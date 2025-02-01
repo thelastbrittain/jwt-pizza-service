@@ -40,7 +40,7 @@ async function createAdminUser() {
   return { ...user, password: 'toomanysecrets' };
 }
 
-async function getAuth() {
+async function getAdminAuth() {
     const adminUser = await createAdminUser();
     const loginRes = await request(app).put('/api/auth').send(adminUser);
     return loginRes.body.token;
@@ -61,7 +61,7 @@ async function getAuth() {
     let newMenuItem = menuItem;
     newMenuItem.title = randomName();
     delete newMenuItem.id;
-    let auth = await getAuth();
+    let auth = await getAdminAuth();
     const addMenuItemRes = await request(app).put('/api/order/menu').set('Authorization', `Bearer ${auth}`).send(newMenuItem);
     
     expect(addMenuItemRes.status).toBe(200);
