@@ -27,21 +27,16 @@ async function createAdminUser() {
       return [loginRes.body.token, adminUser.email];
   }
   
-
-let franchise = {id: 1, name: 'pizzaPocket', stores: [{id: 1, name: 'SLC'},{id: 2, name: "The 'Couve"} ]}
-
-
-
 // test get franchises
 test('getFranchises', async () => {
     const getFranchisesRes = await request(app).get('/api/franchise');
+    let franchiceQuantity = getFranchisesRes.body.length;
+    await createFranchise();
+    const getFranchisesRes2 = await request(app).get('/api/franchise');
+    let newFranchiseQuantity = getFranchisesRes2.body.length;
     expect(getFranchisesRes.status).toBe(200);
-    expect(getFranchisesRes.body).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining(franchise)
-        ]))
+    expect(newFranchiseQuantity).toBe(franchiceQuantity + 1);
 });
-
 
 
 // test getUserFranchises
@@ -59,8 +54,6 @@ async function createFranchise() {
     expect(createFranchiseRes.body).toMatchObject({name: randomFranchice, admins: [{email: email}]})
     return [email, token, createFranchiseRes.body.id];
 }
-
-
 
 
 // // test delete franchise

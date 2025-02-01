@@ -49,28 +49,36 @@ async function getAdminAuth() {
 
 
   test('getMenu', async () => {
+    let newMenuItem = menuItem;
+    newMenuItem.title = randomName();
+    delete newMenuItem.id;
+    await addMenuItem(menuItem);
     const getMenuRes = await request(app).get('/api/order/menu');
     expect(getMenuRes.status).toBe(200);
     expect(getMenuRes.body).toEqual(
         expect.arrayContaining([
           expect.objectContaining(menuItem)
-        ]))
-  });
+        ]))});
 
-  test('addMenuItem', async () => {
-    let newMenuItem = menuItem;
+async function addMenuItemTest() {
+  let newMenuItem = menuItem;
     newMenuItem.title = randomName();
     delete newMenuItem.id;
+  await addMenuItem(menuItem);
+};
+
+async function addMenuItem(newMenuItem) {
     let auth = await getAdminAuth();
     const addMenuItemRes = await request(app).put('/api/order/menu').set('Authorization', `Bearer ${auth}`).send(newMenuItem);
     
     expect(addMenuItemRes.status).toBe(200);
-
-    
     expect(addMenuItemRes.body).toEqual(
         expect.arrayContaining([
-          expect.objectContaining(newMenuItem)
-        ]))});
+          expect.objectContaining(newMenuItem)]))
+    return addMenuItemRes.body;
+};
+
+test('addMenuItem', addMenuItemTest);
 
 
 async function orderItem() {
