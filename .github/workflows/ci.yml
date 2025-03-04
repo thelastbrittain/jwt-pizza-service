@@ -89,12 +89,12 @@ jobs:
           name: package
           path: dist/
   deploy:
-  runs-on: ubuntu-latest
-  permissions:
-    id-token: write
-  needs: build
-  env:
-    version: ${{needs.build.outputs.version}}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    needs: build
+    env:
+      version: ${{needs.build.outputs.version}}
 
     steps:
       - name: Download distribution artifact
