@@ -1,4 +1,4 @@
-const config = require("../grafana.config");
+const config = require("../config");
 const { MetricBuilder } = require("./MetricBuilder");
 const os = require("os");
 // run createTraffic.sh with: ./generateTraffic.sh https://localhost:3000
