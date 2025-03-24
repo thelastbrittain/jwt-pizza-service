@@ -1,4 +1,4 @@
-const config = require("../../grafana.config");
+const config = require("../grafana.config");
 const { MetricBuilder } = require("./MetricBuilder");
 const os = require("os");
 // run createTraffic.sh with: ./generateTraffic.sh https://localhost:3000
@@ -53,11 +53,11 @@ function sendMetricsToGrafana(metrics) {
   const body = JSON.stringify(metrics); // Convert the unified metrics object to JSON string
   console.log(body);
 
-  fetch(`${config.url}`, {
+  fetch(`${config.metrics.url}`, {
     method: "POST",
     body: body,
     headers: {
-      Authorization: `Bearer ${config.apiKey}`,
+      Authorization: `Bearer ${config.metrics.apiKey}`,
       "Content-Type": "application/json",
     },
   })
