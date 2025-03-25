@@ -1,5 +1,4 @@
 const config = require("../config");
-const { stack } = require("../service");
 
 class Logger {
   httpLogger = (req, res, next) => {
@@ -42,7 +41,7 @@ class Logger {
       SQL: sql,
       parameters: params,
     };
-    console.log("Log data: ", logData);
+    // console.log("Log data: ", logData);
     try {
       this.logSQL(logData);
     } catch (error) {
