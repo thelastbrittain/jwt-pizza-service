@@ -1,4 +1,5 @@
 const config = require("../config");
+const { stack } = require("../service");
 
 class Logger {
   httpLogger = (req, res, next) => {
@@ -17,15 +18,54 @@ class Logger {
       res.send = send;
       return res.send(resBody);
     };
-    next();
+    if (next) {
+      next();
+    }
   };
 
   log(level, type, logData) {
-    const labels = { component: config.source, level: level, type: type };
+    const labels = {
+      component: config.logging.source,
+      level: level,
+      type: type,
+    };
     const values = [this.nowString(), this.sanitize(logData)];
     const logEvent = { streams: [{ stream: labels, values: [values] }] };
 
     this.sendLogToGrafana(logEvent);
+  }
+
+  sqlLogger(sql, params) {
+    // console.log("This is the sql: ", sql);
+    // console.log("This is the params: ", params);
+    const logData = {
+      SQL: sql,
+      parameters: params,
+    };
+    console.log("Log data: ", logData);
+    try {
+      this.logSQL(logData);
+    } catch (error) {
+      console.error("Error occured", error);
+    }
+  }
+
+  logSQL(logData) {
+    const labels = {
+      component: config.logging.source,
+    };
+    const values = [this.nowString(), JSON.stringify(logData)];
+    const logEvent = { streams: [{ stream: labels, values: [values] }] };
+
+    this.sendLogToGrafana(logEvent);
+  }
+
+  logError(error) {
+    const logData = {
+      message: error.message,
+      stack: error.stack,
+    };
+    this.log("error", "uncaughtExpection", logData);
   }
 
   statusToLogLevel(statusCode) {
@@ -48,16 +88,20 @@ class Logger {
 
   sendLogToGrafana(event) {
     const body = JSON.stringify(event);
-    fetch(`${config.url}`, {
+    fetch(`${config.logging.url}`, {
       method: "post",
       body: body,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${config.userId}:${config.apiKey}`,
+        Authorization: `Bearer ${config.logging.userId}:${config.logging.apiKey}`,
       },
-    }).then((res) => {
-      if (!res.ok) console.log("Failed to send log to Grafana");
-    });
+    })
+      .then((res) => {
+        if (!res.ok) console.log("Failed to send log to Grafana", res);
+      })
+      .then(() => {
+        console.log("Sent logs to grafana: ");
+      });
   }
 }
 module.exports = new Logger();

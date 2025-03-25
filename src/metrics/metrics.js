@@ -51,7 +51,7 @@ setInterval(() => {
 
 function sendMetricsToGrafana(metrics) {
   const body = JSON.stringify(metrics); // Convert the unified metrics object to JSON string
-  console.log(body);
+  // console.log(body);
 
   fetch(`${config.metrics.url}`, {
     method: "POST",
@@ -83,7 +83,7 @@ function metricTracker(req, res, next) {
   trackAuthMetrics(req, res);
 
   res.on("finish", () => {
-    console.log("Done");
+    // console.log("Done");
   });
   next();
 }
@@ -108,11 +108,11 @@ function trackAuthMetrics(req, res) {
   if (req.method === "PUT" && req.url === "/api/auth") {
     activeUsers++;
     incrementAuthAttemptRates(res);
-    console.log("User logged in. Active users:", activeUsers);
+    // console.log("User logged in. Active users:", activeUsers);
   } else if (req.method === "DELETE" && req.url === "/api/auth") {
     activeUsers = Math.max(0, activeUsers - 1);
     incrementAuthAttemptRates(res);
-    console.log("User logged out. Active users:", activeUsers);
+    // console.log("User logged out. Active users:", activeUsers);
   }
 }
 
@@ -124,10 +124,10 @@ function incrementAuthAttemptRates(res) {
   res.on("finish", () => {
     if (res.statusCode === 200 || res.statusCode === 201) {
       succesfulAuthAttempts++;
-      console.log("succesful login/logout attempt", res.statusCode);
+      // console.log("succesful login/logout attempt", res.statusCode);
     } else {
       unsuccessfulAuthAttempts++;
-      console.log("unsuccesful login/logout attempt", res.statusCode);
+      // console.log("unsuccesful login/logout attempt", res.statusCode);
     }
   });
   // Successful login attempt (e.g., PUT /api/auth with valid credentials)

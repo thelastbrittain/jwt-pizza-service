@@ -5,6 +5,7 @@ const franchiseRouter = require("./routes/franchiseRouter.js");
 const version = require("./version.json");
 const config = require("./config.js");
 const { metricTracker } = require("./metrics/metrics.js");
+const logger = require("./logging/logger.js");
 
 const app = express();
 app.use(express.json());
@@ -17,6 +18,10 @@ app.use((req, res, next) => {
   next();
 });
 app.use(metricTracker);
+app.use(logger.httpLogger);
+process.on("uncaughtException", (error) => {
+  logger.logError(error);
+});
 
 const apiRouter = express.Router();
 app.use("/api", apiRouter);
