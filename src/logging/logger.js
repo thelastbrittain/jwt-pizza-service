@@ -86,24 +86,45 @@ class Logger {
   }
 
   sendLogToGrafana(event) {
-    const body = JSON.stringify(event);
+    console.log(`Here is the info: userID: ${config.logging.userId}, api: ${config.logging.apiKey},
+      url: ${config.logging.url} `);
     fetch(`${config.logging.url}`, {
       method: "post",
-      body: body,
+      body: JSON.stringify(event),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${config.logging.userId}:${config.logging.apiKey}`,
       },
     })
-      .then((res) => {
+      .then(async (res) => {
+        console.log("Response status:", res.status);
+
+        // Handle 204 No Content
+        if (res.status === 204) {
+          console.log("No content returned from Grafana (status 204).");
+          return null; // No need to parse JSON
+        }
+
+        // Handle other success responses
         if (!res.ok) {
-          console.log("Failed to send log to Grafana", res);
+          console.error("Failed to send log to Grafana");
           throw new Error(`HTTP error! status: ${res.status}`);
         }
-        return res.json();
+
+        // Parse JSON for non-204 responses
+        const contentType = res.headers.get("Content-Type");
+        if (contentType && contentType.includes("application/json")) {
+          return res.json(); // Parse JSON if applicable
+        } else {
+          console.warn("Non-JSON response received");
+          return null; // Handle non-JSON responses gracefully
+        }
       })
-      .then(() => {
-        console.log("Sent logs to grafana successfully.");
+      .then((data) => {
+        if (data) {
+          console.log("Response data:", data);
+        }
+        console.log("Sent logs to Grafana successfully.");
       })
       .catch((err) => {
         console.error("Error sending log to Grafana:", err);
