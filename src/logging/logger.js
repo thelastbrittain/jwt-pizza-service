@@ -96,10 +96,17 @@ class Logger {
       },
     })
       .then((res) => {
-        if (!res.ok) console.log("Failed to send log to Grafana", res);
+        if (!res.ok) {
+          console.log("Failed to send log to Grafana", res);
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
       })
       .then(() => {
-        console.log("Sent logs to grafana: ");
+        console.log("Sent logs to grafana successfully.");
+      })
+      .catch((err) => {
+        console.error("Error sending log to Grafana:", err);
       });
   }
 }
