@@ -77,6 +77,27 @@ orderRouter.endpoints = [
   },
 ];
 
+// chaos testing
+let enableChaos = false;
+orderRouter.put(
+  "/chaos/:state",
+  authRouter.authenticateToken,
+  asyncHandler(async (req, res) => {
+    if (req.user.isRole(Role.Admin)) {
+      enableChaos = req.params.state === "true";
+    }
+
+    res.json({ chaos: enableChaos });
+  })
+);
+
+orderRouter.post("/", (req, res, next) => {
+  if (enableChaos && Math.random() < 0.5) {
+    throw new StatusCodeError("Chaos monkey", 500);
+  }
+  next();
+});
+
 // getMenu
 orderRouter.get(
   "/menu",
@@ -132,12 +153,10 @@ orderRouter.post(
     if (r.ok) {
       res.send({ order, reportSlowPizzaToFactoryUrl: j.reportUrl, jwt: j.jwt });
     } else {
-      res
-        .status(500)
-        .send({
-          message: "Failed to fulfill order at factory",
-          reportPizzaCreationErrorToPizzaFactoryUrl: j.reportUrl,
-        });
+      res.status(500).send({
+        message: "Failed to fulfill order at factory",
+        reportPizzaCreationErrorToPizzaFactoryUrl: j.reportUrl,
+      });
     }
   })
 );
